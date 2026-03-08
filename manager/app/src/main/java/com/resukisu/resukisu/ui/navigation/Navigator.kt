@@ -1,5 +1,6 @@
 package com.resukisu.resukisu.ui.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.Saver
@@ -27,6 +28,11 @@ class Navigator(
      * Push a key onto the back stack.
      */
     fun push(key: NavKey) {
+        if (backStack.lastOrNull() == key) {
+            Log.i("Navigator", "Trying push current page to backStack again, ignore!")
+            return
+        }
+
         backStack.add(key)
     }
 
@@ -55,10 +61,17 @@ class Navigator(
     }
 
 
+    private var lastPopTime = 0L
     /**
      * Pop the top key if present.
      */
     fun pop() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastPopTime < 100) {
+            Log.i("Navigator", "pop call more than 1 times in 100ms, ignore!")
+            return
+        }
+
         if (backStackSize() <= 1) return
         backStack.removeLastOrNull()
     }
